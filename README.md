@@ -174,7 +174,7 @@ README.md                 # ← You are here!
  Design Choices & Algorithms
 
 We’ve built the Slack PRD Bot with four guiding principles that make it robust, maintainable, and easy to extend:
-
+```
     Prompt Engineering
 
         Expert Business Analyst: Our system prompt casts the LLM as a domain-expert, ensuring every requirement is framed and extracted with the right context.
@@ -214,9 +214,12 @@ We’ve built the Slack PRD Bot with four guiding principles that make it robust
             Plain TXT via safe UTF-8 decode
 
         User-Friendly Messaging: Any errors encountered during parsing or ticket creation are caught and reported back into the original Slack thread with clear guidance.
+```
+
+--- 
 
 Error Handling & Edge Cases
-
+```
     Malformed PRDs → “Found 0 requirements” + still shows button
 
     OpenAI JSON parse failure → logged & user notified with generic error
@@ -224,7 +227,8 @@ Error Handling & Edge Cases
     Jira API errors → per-requirement logs, then abort with thread notification
 
     Cache misses (button clicked after restart) → empty list & user informed
-    
+ ```
+   
 ---
 
 ## Future Improvements
