@@ -119,7 +119,7 @@ pip install -r requirements.txt
 ---
 
 ## Configuration
-
+```
 Copy .env.example to .env and fill in:
 
 SLACK_BOT_TOKEN= xoxb-...
@@ -133,6 +133,7 @@ JIRA_PROJECT_KEY= SCRUM
 Running the Bot
 
 python app.py
+```
 
 ---
 
