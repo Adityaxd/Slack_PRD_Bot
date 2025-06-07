@@ -175,45 +175,45 @@ README.md                 # ← You are here!
 
 We’ve built the Slack PRD Bot with four guiding principles that make it robust, maintainable, and easy to extend:
 ```
-    Prompt Engineering
+    **Prompt Engineering**
 
-        Expert Business Analyst: Our system prompt casts the LLM as a domain-expert, ensuring every requirement is framed and extracted with the right context.
+        - Expert Business Analyst: Our system prompt casts the LLM as a domain-expert, ensuring every requirement is framed and extracted with the right context.
 
-        Deterministic Extraction: We use a very low temperature (0.1) so the model’s outputs are consistent, making automated parsing reliable.
+        - Deterministic Extraction: We use a very low temperature (0.1) so the model’s outputs are consistent, making automated parsing reliable.
 
-     In-Memory Cache
+     **In-Memory Cache**
 
-        UUID Keying: Every upload generates a short uuid4() key. We store the parsed requirements in a simple Python dict[file_id] → List[Requirement].
+        - UUID Keying: Every upload generates a short uuid4() key. We store the parsed requirements in a simple Python dict[file_id] → List[Requirement].
 
-        No External Storage: Keeps user data transient and avoids spinning up an external database—everything lives in RAM until the next bot restart.
+        - No External Storage: Keeps user data transient and avoids spinning up an external database—everything lives in RAM until the next bot restart.
 
-     Modular Separation
+     **Modular Separation**
 
         Single-Responsibility Files:
 
-            analysis.py → orchestrates document text extraction and LLM calls
+            - analysis.py → orchestrates document text extraction and LLM calls
 
-            jira_integration.py → handles all Jira REST API interactions (including retries on 429s)
+            - jira_integration.py → handles all Jira REST API interactions (including retries on 429s)
 
-            slack_handlers.py → wires Slack Events API to our business logic
+            - slack_handlers.py → wires Slack Events API to our business logic
 
-            app.py → bootstraps the Bolt for Python Slack app
+           -  app.py → bootstraps the Bolt for Python Slack app
 
-        Pydantic Models: We validate every extracted requirement against a strict schema (RequirementExtractionResponse), catching malformed responses before they ever reach Jira.
+        **Pydantic Models**: We validate every extracted requirement against a strict schema (RequirementExtractionResponse), catching malformed responses before they ever reach Jira.
 
-     Error Resilience
+     **Error Resilience**
 
-        Rate-Limit Retries: Automatic back-off and retry logic on HTTP 429 responses from Jira.
+        **Rate-Limit Retries**: Automatic back-off and retry logic on HTTP 429 responses from Jira.
 
-        File Fallbacks: For unknown or malformed uploads, we gracefully handle:
+        **File Fallbacks**: For unknown or malformed uploads, we gracefully handle:
 
-            PDF via pdfplumber
+            - PDF via pdfplumber
 
-            DOCX via python-docx
+            - DOCX via python-docx
 
-            Plain TXT via safe UTF-8 decode
+            - Plain TXT via safe UTF-8 decode
 
-        User-Friendly Messaging: Any errors encountered during parsing or ticket creation are caught and reported back into the original Slack thread with clear guidance.
+        **User-Friendly Messaging**: Any errors encountered during parsing or ticket creation are caught and reported back into the original Slack thread with clear guidance.
 ```
 
 --- 
