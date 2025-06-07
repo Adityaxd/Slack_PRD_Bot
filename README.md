@@ -214,11 +214,11 @@ We’ve built the Slack PRD Bot with four guiding principles that make it robust
             - Plain TXT via safe UTF-8 decode
 
         User-Friendly Messaging: Any errors encountered during parsing or ticket creation are caught and reported back into the original Slack thread with clear guidance.
-```
+
 
 --- 
 
-## Error Handling & Edge Cases
+## Error Handling & Edge Cases 
     Malformed PRDs → “Found 0 requirements” + still shows button
 
     OpenAI JSON parse failure → logged & user notified with generic error
