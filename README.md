@@ -137,7 +137,7 @@ python app.py
 ---
 
 Project Structure & File Roles
-
+```
 bot/
 ├── __init__.py           # (empty) package marker
 ├── config.py             # Loads env vars into Config.*
@@ -168,7 +168,7 @@ README.md                 # ← You are here!
     jira_integration.py
 
         create_jira_tasks(requirements): maps PRD priorities, builds ADF description block, posts to Jira API, handles rate-limits & errors, returns keys & URLs.
-
+``` 
 ---
 
  Design Choices & Algorithms
