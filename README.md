@@ -218,8 +218,7 @@ We’ve built the Slack PRD Bot with four guiding principles that make it robust
 
 --- 
 
-Error Handling & Edge Cases
-```
+## Error Handling & Edge Cases
     Malformed PRDs → “Found 0 requirements” + still shows button
 
     OpenAI JSON parse failure → logged & user notified with generic error
@@ -227,7 +226,7 @@ Error Handling & Edge Cases
     Jira API errors → per-requirement logs, then abort with thread notification
 
     Cache misses (button clicked after restart) → empty list & user informed
- ```
+ 
    
 ---
 
