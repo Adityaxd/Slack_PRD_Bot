@@ -224,20 +224,19 @@ Error Handling & Edge Cases
     Jira API errors → per-requirement logs, then abort with thread notification
 
     Cache misses (button clicked after restart) → empty list & user informed
+    
+---
 
-Future Improvements
+## Future Improvements
 
-    Persistent cache with Redis to survive restarts
-
-    Support .md/.html via markdown parser
-
-    Configurable Slack channels & epics per upload command
-
-    Batching of Jira API calls and more robust back-pressure
-
-    Unit & integration tests for easier CI/CD
-
-    Dockerization for one-click deployment
+- **Full-fledged AI virtual assistant** for managers and CxO’s, integrating with Slack and other corporate apps to simplify workflows via natural-language commands  
+- **Channel context tracking** to generate “what you missed” catch-up reports for users returning from extended leave  
+- Persistent cache with Redis to survive restarts  
+- Support for Markdown (.md) and HTML (.html) uploads via a lightweight parser  
+- Configurable Slack channels & Jira epics per upload command  
+- Batching of Jira API calls and more robust back-pressure handling  
+- Unit & integration tests for easier CI/CD  
+- Dockerization for one-click deployment  
 
 ---
 
