@@ -19,7 +19,8 @@ A Slack bot that lets you drop a Product Requirements Document (PRD) into any ch
 7. [Design Choices & Algorithms](#design-choices--algorithms)  
 8. [Error Handling & Edge Cases](#error-handling--edge-cases)  
 9. [Future Improvements](#future-improvements)  
-10. [License & Acknowledgements](#license--acknowledgements)  
+10. [Full Demo Video](#full-demo-video)  
+11. [License & Acknowledgements](#license--acknowledgements)  
 
 ---
 
@@ -48,30 +49,62 @@ Below is the end-to-end sequence showing how a user’s PRD upload flows through
 
 ![Slack PRD Bot System Overview](Slack_PRD_Bot.png)
 
-```text
-┌───────────┐
-│  Slack    │── file_shared event ──► Slack PRD Bot ──┐
-│ Workspace │                                   │
-└───────────┘                                   ▼
-                                         downloads file bytes
-                                               │
-                                               ▼
-                                         Document Parser
-                                  (pdfplumber / python-docx)
-                                               │
-                                               ▼
-                                    Analyzer (analyze_document)
-            ┌─────────── prompt (system+user) ──►│
-            │                                  OpenAI
-            │                             ◄─── JSON requirements
-            │                                                          ┌─────────┐
-            │                                                          │ Jira    │
-            │              ◄─── store analysis ──── In-Memory ─────────►│ Cloud   │
-            │                                        Cache      POST   └─────────┘
-            │                                   retrieve items
-            │                                                          ▲
-            └───── post summary & “Create Jira Tasks” button ──────────┘
+```plantuml
+@startuml
+title Slack PRD Bot System Overview
 
+skinparam packageStyle rectangle
+skinparam rectangle {
+  BackgroundColor<<Slack>>  #D0E6FF
+  BackgroundColor<<Server>> #F0F0F0
+  BackgroundColor<<AI>>     #E0F4E0
+  BackgroundColor<<Jira>>   #F4E0E0
+}
+
+actor User <<Slack>>
+
+package "Slack Workspace" <<Slack>> {
+  participant "Slack Events API" as Events
+  participant "Slack PRD Bot"    as Bot
+}
+
+package "Bot Server" <<Server>> {
+  participant "Document Parser\n(pdfplumber/docx)" as Parser
+  participant "Analyzer\n(analyze_document)"     as Analyzer
+  participant "In-Memory Cache\n(cache_key→requirements)" as Cache
+}
+
+rectangle "OpenAI API" <<AI>> as OpenAI
+
+package "Jira Cloud" <<Jira>> {
+  participant "Jira Integration" as JiraInt
+  participant "Jira REST API"    as JiraAPI
+}
+
+== Upload & Parse ==
+User -> Events : upload PRD file
+Events -> Bot  : file_share event\n(payload)
+Bot -> Parser  : download file bytes
+Parser -> Parser : extract raw text
+
+== Analyze ==
+Bot -> Bot      : send "Processing your document…"
+Bot -> Analyzer : provide raw text
+Analyzer -> OpenAI : prompt (system + document_text)
+OpenAI -> Analyzer : JSON requirements response
+Analyzer -> Cache    : store latest analysis
+Bot <- Analyzer : "Found X requirements"
+
+== Create Jira Tasks ==
+User -> Bot      : click "Create Jira Tasks"
+Bot -> Cache     : fetch last analysis
+Bot -> JiraInt   : create issues for each req
+JiraInt -> JiraAPI : POST /rest/api/3/issue
+JiraAPI -> JiraInt  : issueKey + URL
+JiraInt -> Bot      : return created links
+Bot -> Bot       : post thread reply with links
+
+@enduml
 
 Tech Stack & Key Libraries
 
@@ -96,11 +129,11 @@ Prerequisites
 
     Python 3.10 or higher
 
-    A Slack App with bot token & signing secret
+    A Slack App with Bot Token & Signing Secret
 
-    OpenAI API key
+    OpenAI API Key
 
-    Jira Cloud account + API token + target project key
+    Jira Cloud account + API Token + target Project Key
 
 Installation
 
@@ -137,15 +170,14 @@ bot/
 └── slack_handlers.py     # Slack event & action listeners + in-memory cache
 app.py                    # Bootstraps Bolt App and registers handlers
 requirements.txt          # pinned dependencies
-README.md                 # ← You are here!
+README.md                 # ← This document
 
     config.py
     Centralizes credentials & URLs as a Pydantic settings model.
 
     analysis.py
 
-        extract_text(bytes, filename)
-        Falls back between PDF, DOCX, or plain-text decoding.
+        extract_text(file_bytes, filename)
 
         analyze_with_openai(text) & analyze_document(...)
         Sends system+user prompt to OpenAI, parses JSON into Pydantic models.
@@ -158,58 +190,41 @@ README.md                 # ← You are here!
 
     jira_integration.py
 
-        create_jira_tasks(requirements): maps PRD priorities, builds ADF description block, posts to Jira API, handles rate-limits & errors, returns keys & URLs.
+        create_jira_tasks(requirements): maps PRD priorities, builds ADF description, posts to Jira API, handles rate-limits & errors, returns keys & URLs.
 
-
- Design Choices & Algorithms
-
-We’ve built the Slack PRD Bot with four guiding principles that make it robust, maintainable, and easy to extend:
+Design Choices & Algorithms
 
     Prompt Engineering
 
-        Expert Business Analyst: Our system prompt casts the LLM as a domain-expert, ensuring every requirement is framed and extracted with the right context.
+        Expert Business Analyst system prompt to ensure context-aware extraction.
 
-        Deterministic Extraction: We use a very low temperature (0.1) so the model’s outputs are consistent, making automated parsing reliable.
+        Low temperature (0.1) for deterministic outputs.
 
-     In-Memory Cache
+    In-Memory Cache
 
-        UUID Keying: Every upload generates a short uuid4() key. We store the parsed requirements in a simple Python dict[file_id] → List[Requirement].
+        UUID Keying: every upload generates uuid4() key.
 
-        No External Storage: Keeps user data transient and avoids spinning up an external database—everything lives in RAM until the next bot restart.
+        Transient Storage: no external DB—everything lives in RAM until restart.
 
-     Modular Separation
+    Modular Separation
 
-        Single-Responsibility Files:
+        Single-Responsibility files (analysis, Jira integration, handlers).
 
-            analysis.py → orchestrates document text extraction and LLM calls
+        Pydantic Models validate every requirement against a strict schema.
 
-            jira_integration.py → handles all Jira REST API interactions (including retries on 429s)
+    Error Resilience
 
-            slack_handlers.py → wires Slack Events API to our business logic
+        Rate-Limit Retries: automatic back-off on 429 from Jira.
 
-            app.py → bootstraps the Bolt for Python Slack app
+        File Fallbacks: PDF → DOCX → plain-text.
 
-        Pydantic Models: We validate every extracted requirement against a strict schema (RequirementExtractionResponse), catching malformed responses before they ever reach Jira.
-
-     Error Resilience
-
-        Rate-Limit Retries: Automatic back-off and retry logic on HTTP 429 responses from Jira.
-
-        File Fallbacks: For unknown or malformed uploads, we gracefully handle:
-
-            PDF via pdfplumber
-
-            DOCX via python-docx
-
-            Plain TXT via safe UTF-8 decode
-
-        User-Friendly Messaging: Any errors encountered during parsing or ticket creation are caught and reported back into the original Slack thread with clear guidance.
+        User-Friendly Messaging: clear Slack thread notifications on errors.
 
 Error Handling & Edge Cases
 
     Malformed PRDs → “Found 0 requirements” + still shows button
 
-    OpenAI JSON parse failure → logged & user notified with generic error
+    OpenAI JSON parse failure → logged & user notified
 
     Jira API errors → per-requirement logs, then abort with thread notification
 
@@ -221,19 +236,20 @@ Future Improvements
 
     Support .md/.html via markdown parser
 
-    Configurable Slack channels & epics per upload command
+    Configurable Slack channels & Epics per upload command
 
-    Batching of Jira API calls and more robust back-pressure
+    Batching of Jira API calls and better back-pressure
 
-    Unit & integration tests for easier CI/CD
+    Unit & integration tests for CI/CD
 
     Dockerization for one-click deployment
 
-## Demo
+Full Demo Video
 
 For a full, comprehensive walkthrough of the bot in action, check out this video:
 
-[▶️ Full Comprehensive Demo for the Bot](https://youtu.be/GGFjIB02L5U)
+▶️ Full Comprehensive Demo for the Bot
+License & Acknowledgements
 
 © 2025 Aditya Chaudhary
 Built with ☕ Python, 🤖 OpenAI, and 🐍 community libraries.
