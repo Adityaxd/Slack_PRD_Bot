@@ -48,7 +48,7 @@ Below is the end-to-end sequence showing how a user’s PRD upload flows through
 
 ![Slack PRD Bot System Overview](Slack_PRD_Bot.png)
 
-
+```
 ┌───────────┐
 │  Slack    │── file_shared event ──► Slack PRD Bot ──┐
 │ Workspace │                                   │
@@ -72,7 +72,7 @@ Below is the end-to-end sequence showing how a user’s PRD upload flows through
             │                                                          ▲
             └───── post summary & “Create Jira Tasks” button ──────────┘
             
-
+```
 ---
 
 Tech Stack & Key Libraries
