@@ -48,7 +48,7 @@ Below is the end-to-end sequence showing how a user’s PRD upload flows through
 
 ![Slack PRD Bot System Overview](Slack_PRD_Bot.png)
 
-```text
+
 ┌───────────┐
 │  Slack    │── file_shared event ──► Slack PRD Bot ──┐
 │ Workspace │                                   │
@@ -71,7 +71,7 @@ Below is the end-to-end sequence showing how a user’s PRD upload flows through
             │                                   retrieve items
             │                                                          ▲
             └───── post summary & “Create Jira Tasks” button ──────────┘
-```text
+            
 
 ---
 
@@ -166,6 +166,7 @@ README.md                 # ← You are here!
 
         create_jira_tasks(requirements): maps PRD priorities, builds ADF description block, posts to Jira API, handles rate-limits & errors, returns keys & URLs.
 
+---
 
  Design Choices & Algorithms
 
