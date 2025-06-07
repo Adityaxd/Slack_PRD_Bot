@@ -107,13 +107,16 @@ Prerequisites
     Jira Cloud account + API token + target project key
 
 Installation
-
+```
 git clone https://github.com/your-org/Slack_PRD_Bot.git
 cd Slack_PRD_Bot
 python3 -m venv .venv
 source .venv/bin/activate        # macOS/Linux
 .\.venv\Scripts\activate         # Windows PowerShell
 pip install -r requirements.txt
+```
+
+---
 
 Configuration
 
