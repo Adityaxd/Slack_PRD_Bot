@@ -51,8 +51,8 @@ Below is the end-to-end sequence showing how a user’s PRD upload flows through
 ```
 ┌───────────┐
 │  Slack    │── file_shared event ──► Slack PRD Bot ──┐
-│ Workspace │                                   │
-└───────────┘                                   ▼
+│ Workspace │                                         │
+└───────────┘                                         ▼
                                          downloads file bytes
                                                │
                                                ▼
